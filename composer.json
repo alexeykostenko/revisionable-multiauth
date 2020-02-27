@@ -11,5 +11,12 @@
     "minimum-stability": "dev",
     "require": {
         "omaximus/revisionable": "^1.28"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pdffiller\\RevisionableMultiauth\\ServiceProvider"
+            ]
+        }
     }
 }
