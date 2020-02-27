@@ -1,0 +1,15 @@
+{
+    "name": "pdffiller/revisionable-multiauth",
+    "description": "Multiauth for omaximus/revisionable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "aleksey.kostenko.dev",
+            "email": "aleksey.kostenko.dev@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "omaximus/revisionable": "^1.28"
+    }
+}
