@@ -17,7 +17,7 @@
             "src/migrations"
         ],
         "psr-4": {
-            "Pdffiller\\RevisionableMultiauth": "src/"
+            "Pdffiller\\RevisionableMultiauth\\": "src/"
         }
     },
     "extra": {
