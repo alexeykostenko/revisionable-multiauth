@@ -18,7 +18,7 @@ You need to add section repositories in your composer.json, for example:
 
 Require package:
 ```
-composer require alexeykostenko/revisionable-multiauth:dev-master
+composer require alexeykostenko/revisionable-multiauth
 ```
 
 Finally, you'll also need to run migration on the package
