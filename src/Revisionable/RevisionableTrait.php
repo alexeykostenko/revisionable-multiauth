@@ -2,7 +2,9 @@
 
 namespace Pdffiller\RevisionableMultiauth;
 
+use Venturecraft\Revisionable\Revision;
 use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait;
+
 /*
  * This file is part of the Revisionable package by Venture Craft
  *
@@ -16,7 +18,7 @@ use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait
  */
 trait RevisionableTrait
 {
-    use VenturecraftRevisionableTrait, Userable;
+    use  VenturecraftRevisionableTrait;
 
     /**
      * Called after a model is successfully saved.
@@ -30,9 +32,10 @@ trait RevisionableTrait
         } else {
             $LimitReached = false;
         }
-        if (isset($this->revisionCleanup)){
+
+        if (isset($this->revisionCleanup)) {
             $RevisionCleanup=$this->revisionCleanup;
-        }else{
+        } else {
             $RevisionCleanup=false;
         }
 
@@ -51,7 +54,7 @@ trait RevisionableTrait
                     'key' => $key,
                     'old_value' => $this->formatRevisionableValue(array_get($this->originalData, $key)),
                     'new_value' => $this->formatRevisionableValue($this->updatedData[$key]),
-                    'user_type' => $this->getCurrentAuthGuard(),
+                    'user_type' => $this->getSystemUserType(),
                     'user_id' => $this->getSystemUserId(),
                     'created_at' => new \DateTime(),
                     'updated_at' => new \DateTime(),
@@ -77,24 +80,21 @@ trait RevisionableTrait
      */
     public function postCreate()
     {
-
         // Check if we should store creations in our revision history
         // Set this value to true in your model if you want to
-        if(empty($this->revisionCreationsEnabled))
-        {
+        if(empty($this->revisionCreationsEnabled)) {
             // We should not store creations.
             return false;
         }
 
-        if ((!isset($this->revisionEnabled) || $this->revisionEnabled))
-        {
+        if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
             $revisions[] = array(
                 'revisionable_type' => $this->getMorphClass(),
                 'revisionable_id' => $this->getKey(),
                 'key' => self::CREATED_AT,
                 'old_value' => null,
                 'new_value' => $this->{self::CREATED_AT},
-                'user_type' => $this->getCurrentAuthGuard(),
+                'user_type' => $this->getSystemUserType(),
                 'user_id' => $this->getSystemUserId(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
@@ -104,7 +104,6 @@ trait RevisionableTrait
             \DB::table($revision->getTable())->insert($revisions);
             \Event::fire('revisionable.created', array('model' => $this, 'revisions' => $revisions));
         }
-
     }
 
     /**
@@ -122,14 +121,32 @@ trait RevisionableTrait
                 'key' => $this->getDeletedAtColumn(),
                 'old_value' => null,
                 'new_value' => $this->{$this->getDeletedAtColumn()},
-                'user_type' => $this->getCurrentAuthGuard(),
+                'user_type' => $this->getSystemUserType(),
                 'user_id' => $this->getSystemUserId(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
             );
-            $revision = new \Venturecraft\Revisionable\Revision;
+
+            $revision = new Revision;
             \DB::table($revision->getTable())->insert($revisions);
             \Event::fire('revisionable.deleted', array('model' => $this, 'revisions' => $revisions));
         }
+    }
+
+    public function getSystemUserType()
+    {
+        try {
+            $guards = array_keys(config('auth.guards'));
+
+            foreach ($guards as $guard) {
+                if (Auth::guard($guard)->check()) {
+                    return $guard;
+                }
+            }
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        return null;
     }
 }
