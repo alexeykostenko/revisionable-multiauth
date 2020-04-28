@@ -2,7 +2,7 @@
 
 namespace Pdffiller\RevisionableMultiauth;
 
-use Venturecraft\Revisionable\Revision;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait;
 
 /*
@@ -148,5 +148,13 @@ trait RevisionableTrait
         }
 
         return null;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function revisionHistory()
+    {
+        return $this->morphMany(Revision::class, 'revisionable');
     }
 }
