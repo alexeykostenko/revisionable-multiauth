@@ -4,6 +4,7 @@ namespace Pdffiller\RevisionableMultiauth;
 
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait;
+use Illuminate\Support\Arr;
 
 /*
  * This file is part of the Revisionable package by Venture Craft
@@ -45,20 +46,20 @@ trait RevisionableTrait
 
             $changes_to_record = $this->changedRevisionableFields();
 
-            $revisions = array();
+            $revisions = [];
 
             foreach ($changes_to_record as $key => $change) {
-                $revisions[] = array(
+                $revisions[] = [
                     'revisionable_type' => $this->getMorphClass(),
                     'revisionable_id' => $this->getKey(),
                     'key' => $key,
-                    'old_value' => $this->formatRevisionableValue(array_get($this->originalData, $key)),
+                    'old_value' => $this->formatRevisionableValue(Arr::get($this->originalData, $key)),
                     'new_value' => $this->formatRevisionableValue($this->updatedData[$key]),
                     'user_type' => $this->getSystemUserType(),
                     'user_id' => $this->getSystemUserId(),
                     'created_at' => new \DateTime(),
                     'updated_at' => new \DateTime(),
-                );
+                ];
             }
 
             if (count($revisions) > 0) {
@@ -70,7 +71,7 @@ trait RevisionableTrait
                 }
                 $revision = new Revision;
                 \DB::table($revision->getTable())->insert($revisions);
-                \Event::fire('revisionable.saved', array('model' => $this, 'revisions' => $revisions));
+                \Event::dispatch('revisionable.saved', ['model' => $this, 'revisions' => $revisions]);
             }
         }
     }
@@ -88,7 +89,7 @@ trait RevisionableTrait
         }
 
         if ((!isset($this->revisionEnabled) || $this->revisionEnabled)) {
-            $revisions[] = array(
+            $revisions[] = [
                 'revisionable_type' => $this->getMorphClass(),
                 'revisionable_id' => $this->getKey(),
                 'key' => self::CREATED_AT,
@@ -98,11 +99,11 @@ trait RevisionableTrait
                 'user_id' => $this->getSystemUserId(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
-            );
+            ];
 
             $revision = new Revision;
             \DB::table($revision->getTable())->insert($revisions);
-            \Event::fire('revisionable.created', array('model' => $this, 'revisions' => $revisions));
+            \Event::dispatch('revisionable.created', ['model' => $this, 'revisions' => $revisions]);
         }
     }
 
@@ -115,7 +116,7 @@ trait RevisionableTrait
             && $this->isSoftDelete()
             && $this->isRevisionable($this->getDeletedAtColumn())
         ) {
-            $revisions[] = array(
+            $revisions[] = [
                 'revisionable_type' => $this->getMorphClass(),
                 'revisionable_id' => $this->getKey(),
                 'key' => $this->getDeletedAtColumn(),
@@ -125,11 +126,11 @@ trait RevisionableTrait
                 'user_id' => $this->getSystemUserId(),
                 'created_at' => new \DateTime(),
                 'updated_at' => new \DateTime(),
-            );
+            ];
 
             $revision = new Revision;
             \DB::table($revision->getTable())->insert($revisions);
-            \Event::fire('revisionable.deleted', array('model' => $this, 'revisions' => $revisions));
+            \Event::dispatch('revisionable.deleted', ['model' => $this, 'revisions' => $revisions]);
         }
     }
 
