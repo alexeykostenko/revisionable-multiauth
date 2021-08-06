@@ -14,7 +14,8 @@
     },
     "autoload": {
         "classmap": [
-            "src/migrations"
+            "src",
+            "../../omaximus/revisionable/src/ServiceProvider.php"
         ],
         "psr-4": {
             "Pdffiller\\RevisionableMultiauth\\": "src/"
