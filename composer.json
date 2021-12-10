@@ -10,7 +10,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "omaximus/revisionable": "~2.0"
+        "omaximus/revisionable": "~2.0|~3.0"
     },
     "autoload": {
         "classmap": [
