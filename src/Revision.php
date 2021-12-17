@@ -2,10 +2,9 @@
 
 namespace Pdffiller\RevisionableMultiauth;
 
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Venturecraft\Revisionable\Revision as VenturecraftRevision;
-use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Revision.
@@ -20,7 +19,9 @@ class Revision extends VenturecraftRevision
     /**
      * User Responsible.
      *
-     * @return User user responsible for the change
+     * @return User|bool user responsible for the change
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
     public function userResponsible()
     {

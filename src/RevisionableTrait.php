@@ -2,7 +2,6 @@
 
 namespace Pdffiller\RevisionableMultiauth;
 
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait;
 use Illuminate\Support\Arr;
 
