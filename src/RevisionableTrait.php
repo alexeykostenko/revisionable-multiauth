@@ -2,6 +2,7 @@
 
 namespace Pdffiller\RevisionableMultiauth;
 
+use Venturecraft\Revisionable\Revisionable;
 use Venturecraft\Revisionable\RevisionableTrait as VenturecraftRevisionableTrait;
 use Illuminate\Support\Arr;
 
@@ -48,17 +49,19 @@ trait RevisionableTrait
             $revisions = [];
 
             foreach ($changes_to_record as $key => $change) {
-                $revisions[] = [
+                $original = [
                     'revisionable_type' => $this->getMorphClass(),
                     'revisionable_id' => $this->getKey(),
                     'key' => $key,
-                    'old_value' => $this->formatRevisionableValue(Arr::get($this->originalData, $key)),
-                    'new_value' => $this->formatRevisionableValue($this->updatedData[$key]),
+                    'old_value' => Arr::get($this->originalData, $key),
+                    'new_value' => $this->updatedData[$key],
                     'user_type' => $this->getSystemUserType(),
                     'user_id' => $this->getSystemUserId(),
                     'created_at' => new \DateTime(),
                     'updated_at' => new \DateTime(),
                 ];
+
+                $revisions[] = array_merge($original, $this->getAdditionalFields());
             }
 
             if (count($revisions) > 0) {
@@ -68,7 +71,7 @@ trait RevisionableTrait
                         $delete->delete();
                     }
                 }
-                $revision = new Revision;
+                $revision = Revisionable::newModel();
                 \DB::table($revision->getTable())->insert($revisions);
                 \Event::dispatch('revisionable.saved', ['model' => $this, 'revisions' => $revisions]);
             }
@@ -100,7 +103,11 @@ trait RevisionableTrait
                 'updated_at' => new \DateTime(),
             ];
 
-            $revision = new Revision;
+            //Determine if there are any additional fields we'd like to add to our model contained in the config file, and
+            //get them into an array.
+            $revisions = array_merge($revisions[0], $this->getAdditionalFields());
+
+            $revision = Revisionable::newModel();
             \DB::table($revision->getTable())->insert($revisions);
             \Event::dispatch('revisionable.created', ['model' => $this, 'revisions' => $revisions]);
         }
@@ -127,7 +134,10 @@ trait RevisionableTrait
                 'updated_at' => new \DateTime(),
             ];
 
-            $revision = new Revision;
+            //Since there is only one revision because it's deleted, let's just merge into revision[0]
+            $revisions = array_merge($revisions[0], $this->getAdditionalFields());
+
+            $revision = Revisionable::newModel();
             \DB::table($revision->getTable())->insert($revisions);
             \Event::dispatch('revisionable.deleted', ['model' => $this, 'revisions' => $revisions]);
         }
